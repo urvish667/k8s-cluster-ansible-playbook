@@ -1,0 +1,103 @@
+---
+- hosts: tag_Name_kube_master
+  become: true
+
+  tasks:
+    - name: Installing the docker  
+      yum:
+        name: docker
+        state: present
+
+    - name: Starting docker service
+      service:
+        name: docker
+        enabled: yes
+
+    - name: Yum configuration for kubernetes
+      yum_repository:
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
+        name: kubernetes
+        description: Kubernetes repository
+        gpgcheck: true
+        enabled: true
+        repo_gpgcheck: true
+        gpgkey: >-
+          https://packages.cloud.google.com/yum/doc/yum-key.gpg
+          https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        file: kubernetes
+
+    - name: Installing kubelet, kubelet, and kubeadm
+      yum:
+        name: 
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        disable_excludes: kubernetes
+
+    - name: Starting kubelet service 
+      service:
+        name: kubelet
+        enabled: yes
+
+    - name: Creating daemon.json file 
+      copy:
+        content: '{ "exec-opts":["native.cgroupdriver=systemd"] }'
+        dest: /etc/docker/daemon.json
+
+    - name: Restarting docker service
+      service:
+        name: docker
+        state: restarted
+
+    - name: Pulling required images 
+      command: kubeadm config images pull
+
+    - name: Installing iproute-tc 
+      yum:
+        name: iproute-tc
+        state: present
+        
+    - name: Changing the status of net.bridge.bridge-nf-call-iptables
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: Initializing kubeadm with 10.240.0.0/16 IP range
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem
+      ignore_errors: yes
+    
+    - name: Creating $HOME/.kube directory
+      file:
+        path: $HOME/.kube
+        state: directory
+    
+    - name: Copying /etc/kuberenetes/admin.conf file to $HOME/.kube/config
+      copy: 
+        src: /etc/kubernetes/admin.conf
+        dest: $HOME/.kube/config
+        remote_src: yes 
+
+    - name: Making root user to owner of $HOME/.kube/config
+      file:
+        path: $HOME/.kube/config
+        owner: "{{ ansible_facts['effective_user_id'] }}"
+        group: "{{ ansible_facts['effective_group_id'] }}"
+
+    - name: Removing caches
+      shell: echo 3 > /proc/sys/vm/drop_caches
+
+    - name: Creating token for worker nodes
+      command: kubeadm token create --print-join-command
+      register: join_command
+
+    - name: Downloading the kube-flannel pods
+      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+    - name: Printing the joining token
+      debug:
+        msg: "{{ join_command['stdout']  }}"
+  

@@ -1,0 +1,82 @@
+---
+- hosts: tag_Name_kube_worker
+  become: true
+  vars_prompt:
+    - name: join_command
+      prompt: Enter hash code
+      private: no
+
+  tasks:
+    - name: Installing docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Starting docker service
+      service:
+        name: docker
+        enabled: yes
+
+    - name: Yum configuration for kubernetes
+      yum_repository:
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
+        name: kubernetes
+        description: Kubernetes repository
+        gpgcheck: true
+        enabled: true
+        repo_gpgcheck: true
+        gpgkey: >-
+          https://packages.cloud.google.com/yum/doc/yum-key.gpg
+          https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        file: kubernetes
+
+    - name: Installing kubeadm, kubectl, and kubeadm 
+      yum:
+        name: 
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        disable_excludes: kubernetes
+
+    - name: Starting kubelet service 
+      service:
+        name: kubelet
+        enabled: yes
+
+    - name: Creating /etc/docker/daemon.json
+      copy:
+        content: '{ "exec-opts":["native.cgroupdriver=systemd"] }'
+        dest: /etc/docker/daemon.json
+
+    - name: Restarting docker service
+      service:
+        name: docker
+        state: restarted
+
+    - name: Installing iproute-tc 
+      yum:
+        name: iproute-tc
+        state: present
+        
+    - name: Changing the status of net.bridge.bridge-nf-call-ip6tables
+      sysctl:
+        name: net.bridge.bridge-nf-call-ip6tables
+        value: 1
+        sysctl_set: yes
+        state: present
+        reload: yes
+    
+    - name: Changing the status of net.bridge.bridge-nf-call-iptables
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: Running kube joining command
+      command: "{{ join_command }}"
+    
+    - name: Clearing the caches
+      shell: echo 3 > /proc/sys/vm/drop_caches
