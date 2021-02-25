@@ -22,3 +22,20 @@ Use the vault's variable like this in the playbook.<br>
 	    aws_secret_key: "{{ secret_key }}"
 	    
 I have already created a YAML file called ___ec2_provisioning.yml___. It will launch the instances. For increase or decrease, the number of instances edits the *count: <number>* inside the playbook and run the playbook with *ansible-playbook --vault-id @prompt ec2_provisioning* and enter the password of your vault.
+
+## Step 2: Dynamic Inventory
+I have already uploaded the files for creating the dynamic inventory inside the folder called **hosts**, and we will mention it in the **ansible.cfg** file at __inventory=hosts__. In the hosts folder, we have the **ec2.py** and **ec2.ini** file, that will going to help us to find the IP of the instances from the AWS cloud.
+
+	export AWS_ACCESS_KEY_ID=<'access-key'>
+	export AWS_SECRET_ACCESS_KEY=<'secret-key'>
+	export ANSIBLE_HOSTS=<path/of/ec2.py>
+	export EC2_INI_PATH=<path/of/ec2.ini>
+
+The above command will export the environmental variables. These variable helps to find the necessary things for ec2.py file to run.
+
+	./ec2.py --list
+
+The above command will list all the instances by tag name.
+
+## Step 3: Step up the master node and worker node.
+Now, all the pre-requisite has been done. Now Just execute the **kube-maste.yml**, it will print the token of master node. Copy that token and paste it while execution of file **kube-worker.yml**. These file will configure the sentire cluster for us without going on to the AWS cloud.
