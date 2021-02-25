@@ -4,7 +4,7 @@ I have created some playbooks for creating the cluster on AWS with Ansible. To d
 For provisioning, Ansible provides the ec2 module of AWS. It requires an AWS IAM user access key and secret key, we can get it from the IAM service of AWS if we have an AWS account. After getting the credentials, we can store them as environmental variables or we can use Ansible-vault to encrypt them. In this example, I have used Ansible-vault to provide more security. Here is a step to create it:
 ### Ansible vault
 
-	*ansible-vault create secret.yml*<br>
+	ansible-vault create secret.yml
 	New Vault password:<br> 
 	Confirm New Vault password:<br>
 	
