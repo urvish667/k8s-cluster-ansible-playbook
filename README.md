@@ -5,8 +5,8 @@ For provisioning, Ansible provides the ec2 module of AWS. It requires an AWS IAM
 ### Ansible vault
 
 	ansible-vault create secret.yml
-	New Vault password:<br> 
-	Confirm New Vault password:<br>
+	New Vault password: 
+	Confirm New Vault password:
 	
 After running the above command, it will ask you to create a password and then it will open a vi editor to edit the file. Just enter the access key and secret key in YAML format. Like this:<br>
 
