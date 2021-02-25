@@ -39,5 +39,5 @@ The above command will export the environmental variables. These variable helps 
 
 The above command will list all the instances by tag name.
 
-## Step 3: Step up the master node and worker node.
+## Step 3: Setting up the master node and worker node.
 Now, all the pre-requisite has been done. Now Just execute the **kube-maste.yml**, it will print the token of master node. Copy that token and paste it while execution of file **kube-worker.yml**. These file will configure the sentire cluster for us without going on to the AWS cloud.
