@@ -23,7 +23,7 @@ Use the vault's variable like this in the playbook.<br>
 	    aws_access_key: "{{ access_key }}"
 	    aws_secret_key: "{{ secret_key }}"
 	    
-I have already created a YAML file called ___ec2_provisioning.yml___. It will launch the instances. For increase or decrease, the number of instances edits the *count: <number>* inside the playbook and run the playbook with *ansible-playbook --vault-id @prompt ec2_provisioning* and enter the password of your vault.
+I have already created a YAML file called ___ec2_provisioning.yml___. It will launch the instances. For increase or decrease, the number of instances edits the *count: <number>* inside the playbook and run the playbook with **ansible-playbook --vault-id @prompt ec2_provisioning** and enter the password of your vault.
 
 ## Step 2: Dynamic Inventory
 I have already uploaded the files for creating the dynamic inventory inside the folder called **hosts**, and we will mention it in the **ansible.cfg** file at __inventory=hosts__. In the hosts folder, we have the **ec2.py** and **ec2.ini** file, that will going to help us to find the IP of the instances from the AWS cloud.
